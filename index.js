@@ -35,8 +35,13 @@ async function run() {
     // Send a ping to confirm a successful connection
     //! Rest APIs Goes Here
 
-    app.post('/coffee', (req, res) => {
-      
+    const coffeeCollection = client.db('coffeeDb').collection('coffee');
+
+    app.post('/coffee', async (req, res) => {
+      const newCoffee = req.body;
+      console.log(newCoffee);
+      const result = await coffeeCollection.insertOne(newCoffee);
+      res.send(result);
     })
 
 
