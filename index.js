@@ -35,7 +35,9 @@ async function run() {
     // Send a ping to confirm a successful connection
     //! Rest APIs Goes Here
 
-
+    app.post('/coffee', (req, res) => {
+      
+    })
 
 
     await client.db("admin").command({ ping: 1 });
