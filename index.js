@@ -1,10 +1,9 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const app = express();
-require('dotenv').config();
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const port = process.env.PORT || 3000; 
- 
+require("dotenv").config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -14,8 +13,7 @@ app.use(express.json());
 const path = require("path");
 let viewsPath = path.join(__dirname, "views");
 
-/*******************************************MONGO DB****************************************************************/ 
-
+/*******************************************MONGO DB****************************************************************/
 
 const uri = `mongodb+srv://himuchowdhury01:gqgDrG9r0tt7rVub@coffee-cluster.twmemmn.mongodb.net/?retryWrites=true&w=majority&appName=coffee-cluster`;
 
@@ -25,7 +23,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -35,37 +33,59 @@ async function run() {
     // Send a ping to confirm a successful connection
     //! Rest APIs Goes Here
 
-    const coffeeCollection = client.db('coffeeDb').collection('coffee');
+    const coffeeCollection = client.db("coffeeDb").collection("coffee");
 
-    app.get('/coffee', async (req, res) => {
+    app.get("/coffee", async (req, res) => {
       const cursor = coffeeCollection.find();
       const result = await cursor.toArray();
-      res.send(result)
-    })
+      res.send(result);
+    });
 
-    app.post('/coffee', async (req, res) => {
+    app.post("/coffee", async (req, res) => {
       const newCoffee = req.body;
       console.log(newCoffee);
       const result = await coffeeCollection.insertOne(newCoffee);
       res.send(result);
-    })
+    });
 
-    app.delete('/coffee/:id', async (req, res) => {
+    app.delete("/coffee/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) };
       const result = await coffeeCollection.deleteOne(query);
       res.send(result);
-    })
+    });
 
-    app.get('/coffee/:id', async (req, res) => {
+    app.put("/coffee/:id", async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
-      const result = await coffeeCollection.findOne(query);
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const updatedCoffee = req.body;
+      const coffee = {
+        $set: {
+          name: updatedCoffee.name,
+          quantity: updatedCoffee.quantity,
+          supplier: updatedCoffee.supplier,
+          taste: updatedCoffee.taste,
+          category: updatedCoffee.category,
+          details: updatedCoffee.details,
+          photo: updatedCoffee.photo,
+        },
+      };
+      const result = await coffeeCollection.updateOne(filter, coffee, options);
       res.send(result)
-    })
+    });
+
+    app.get("/coffee/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await coffeeCollection.findOne(query);
+      res.send(result);
+    });
 
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -73,13 +93,11 @@ async function run() {
 }
 run().catch(console.dir);
 
-
-
-/***********************************************ENDs*****************************************************************/ 
-app.get('/', (req, res) =>{
-    res.sendFile(`${viewsPath}/index.html`);
+/***********************************************ENDs*****************************************************************/
+app.get("/", (req, res) => {
+  res.sendFile(`${viewsPath}/index.html`);
 });
 
 app.listen(port, () => {
-    console.log(`Coffee Server Running on port ${port}`);
-})
+  console.log(`Coffee Server Running on port ${port}`);
+});
